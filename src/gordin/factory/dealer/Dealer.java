@@ -17,22 +17,25 @@ import java.util.Date;
  */
 public class Dealer implements Runnable, Enumerable {
     static final private Logger logger = Logger.getLogger(Dealer.class);
+    private boolean logging;
     static private volatile int time = 1*1000;
-    static private Long lastId = new Long(1);
-    private long myId;
+    static private long lastId = 1;
+    static private final Object lock = new Object();
+    private final long myId;
     private BlockingQueue<Car> carBlockingQueue;
 
     private Dealer(){
-        synchronized (lastId){
-            myId = lastId.longValue();
-            lastId = new Long(myId+1);
+        synchronized (lock){
+            myId = lastId;
+            lastId++;
             System.out.println("d "+myId);
         }
     }
 
-    public Dealer(BlockingQueue<Car> carBlockingQueue){
+    public Dealer(BlockingQueue<Car> carBlockingQueue, boolean logging){
         this();
         this.carBlockingQueue = carBlockingQueue;
+        this.logging = logging;
     }
 
     public void run()
@@ -46,7 +49,8 @@ public class Dealer implements Runnable, Enumerable {
                                  +car.getId()+">(Body:<"+car.getBodyId()
                                  +">, Engine:<"+car.getEngineId()+">, Accessory:<"
                                  +car.getAccessoryId()+">)";
-                logger.debug(info);
+                if(this.logging)
+                    logger.debug(info);
             }
         }
         catch (InterruptedException e)

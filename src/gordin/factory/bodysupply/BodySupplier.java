@@ -12,15 +12,18 @@ import gordin.BlockingQueue;
  */
 public class BodySupplier implements Runnable, Enumerable {
     private static volatile int timeToCreate = 10*1000;
-    private static Long lastId = new Long(1);
-    private static Integer produced = 0;
+    private static long lastId = 1;
+    private static final Object lock = new Object();
+    private static int produced = 0;
+    private static final Object productLock = new Object();
     private final long myId;
     private BlockingQueue<Body> blockingQueue;
 
     private BodySupplier(){
-        synchronized (lastId){
-            myId = lastId.longValue();
-            lastId = new Long(myId+1);
+        synchronized (lock){
+            myId = lastId;
+            lastId++;
+            System.out.println("bsup "+myId);
         }
     }
 
@@ -28,13 +31,13 @@ public class BodySupplier implements Runnable, Enumerable {
     {
         this();
         this.blockingQueue = blockingQueue;
-        System.out.println("bsup "+myId);
     }
 
     public long getId()
     {
         return myId;
     }
+
 
     public void run()
     {
@@ -43,10 +46,9 @@ public class BodySupplier implements Runnable, Enumerable {
             {
                 Thread.sleep(timeToCreate);
                 blockingQueue.put(new Body(getId()));
-                synchronized (produced)
+                synchronized (productLock)
                 {
-                    int n = produced.intValue();
-                    produced = new Integer(n+1);
+                    produced++;
                 }
             }
         } catch (InterruptedException e) {
@@ -54,13 +56,12 @@ public class BodySupplier implements Runnable, Enumerable {
         }
     }
 
-
     public static int producedBodies()
     {
         int n;
-        synchronized (produced)
+        synchronized (productLock)
         {
-            n = produced.intValue();
+            n = produced;
         }
         return n;
     }

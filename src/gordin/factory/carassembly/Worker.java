@@ -16,18 +16,20 @@ import org.apache.log4j.Logger;
  */
 public class Worker implements Runnable, Enumerable {
     static private volatile int workTime = 1*1000;
-    static private Long lastId = new Long(1);
-    private static Integer produced = 0;
-    private long myId;
+    static private long lastId = 1;
+    static private final Object lock = new Object();
+    private static int produced = 0;
+    private static final Object productLock = new Object();
+    private final long myId;
     static private BlockingQueue<Body> bodyBlockingQueue;
     static private BlockingQueue<Engine> engineBlockingQueue;
     static private BlockingQueue<Accessory> accessoryBlockingQueue;
     static private BlockingQueue<Car> carBlockingQueue;
 
     private Worker(){
-        synchronized (lastId){
-            myId = lastId.longValue();
-            lastId = new Long(myId+1);
+        synchronized (lock){
+            myId = lastId;
+            lastId++;
             System.out.println("w "+myId);
 
         }
@@ -55,6 +57,10 @@ public class Worker implements Runnable, Enumerable {
                 Accessory accessory = accessoryBlockingQueue.take();
                 Thread.sleep(workTime);
                 carBlockingQueue.put(new Car(myId, body, engine, accessory));
+                synchronized (productLock)
+                {
+                    produced++;
+                }
             }
         }
         catch (InterruptedException e)
@@ -71,9 +77,9 @@ public class Worker implements Runnable, Enumerable {
     public static int producedCars()
     {
         int n;
-        synchronized (produced)
+        synchronized (productLock)
         {
-            n = produced.intValue();
+            n = produced;
         }
         return n;
     }

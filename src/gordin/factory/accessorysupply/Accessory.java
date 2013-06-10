@@ -10,16 +10,17 @@ import gordin.factory.Enumerable;
  * To change this template use File | Settings | File Templates.
  */
 public class Accessory implements Enumerable {
-    static private Long lastId = new Long(1);
+    static private long lastId = 1;
+    static private final Object lock = new Object();
     private final long myId;
 
     public Accessory(long idSupplier)
     {
-        synchronized (lastId)
+        synchronized (lock)
         {
-            String str = ""+idSupplier+lastId.longValue();
+            String str = ""+idSupplier+lastId;
             myId = Long.parseLong(str);
-            lastId = new Long(lastId.longValue()+1);
+            lastId++;
             System.out.println("ac "+myId);
         }
     }

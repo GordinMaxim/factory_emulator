@@ -12,7 +12,7 @@ import java.util.Queue;
  * To change this template use File | Settings | File Templates.
  */
 public class BlockingQueue<T> {
-    private List<T> storage = new LinkedList<T>();
+    private final List<T> storage = new LinkedList<T>();
     private int capacity;
 
     private BlockingQueue(){}

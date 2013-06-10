@@ -12,15 +12,17 @@ import gordin.BlockingQueue;
  */
 public class AccessorySupplier implements Runnable, Enumerable {
     private static volatile int timeToCreate = 10*1000;
-    private static Long lastId = new Long(1);
-    private static Integer produced = 0;
+    private static long lastId = 1;
+    private static final Object lock = new Object();
+    private static int produced = 0;
+    private static final Object productLock = new Object();
     private final long myId;
     private BlockingQueue<Accessory> blockingQueue;
 
     private AccessorySupplier(){
-        synchronized (lastId){
-            myId = lastId.intValue();
-            lastId = new Long(myId+1);
+        synchronized (lock){
+            myId = lastId;
+            lastId++;
             System.out.println("acsup "+myId);
         }
     }
@@ -44,10 +46,9 @@ public class AccessorySupplier implements Runnable, Enumerable {
             {
                 Thread.sleep(timeToCreate);
                 blockingQueue.put(new Accessory(getId()));
-                synchronized (produced)
+                synchronized (productLock)
                 {
-                    int n = produced.intValue();
-                    produced = new Integer(n+1);
+                    produced++;
                 }
             }
         } catch (InterruptedException e) {
@@ -58,9 +59,9 @@ public class AccessorySupplier implements Runnable, Enumerable {
     public static int producedAccessories()
     {
         int n;
-        synchronized (produced)
+        synchronized (productLock)
         {
-            n = produced.intValue();
+            n = produced;
         }
         return n;
     }

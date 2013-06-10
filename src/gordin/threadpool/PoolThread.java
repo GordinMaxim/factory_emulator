@@ -10,8 +10,9 @@ import gordin.BlockingQueue;
  * To change this template use File | Settings | File Templates.
  */
 public class PoolThread extends Thread {
-    private BlockingQueue<Runnable> tasks;
+    private final BlockingQueue<Runnable> tasks;
     private boolean isStopped = false;
+    private Object lock = new Object();
 
     public PoolThread(BlockingQueue<Runnable> tasks)
     {
@@ -20,6 +21,12 @@ public class PoolThread extends Thread {
 
     public void run()
     {
+        boolean isStopped;
+        synchronized (lock)
+        {
+            isStopped = this.isStopped;
+        }
+
         while(!isStopped)
         {
             try {
@@ -30,16 +37,27 @@ public class PoolThread extends Thread {
             {
                 e.printStackTrace();
             }
+
+            synchronized (lock)
+            {
+                isStopped = this.isStopped;
+            }
         }
     }
 
-    public synchronized void stopThread()
+    public void stopThread()
     {
-        this.isStopped = false;
+        synchronized (lock)
+        {
+            this.isStopped = false;
+        }
     }
 
-    public synchronized boolean isStopped()
+    public boolean isStopped()
     {
-        return isStopped;
+        synchronized (lock)
+        {
+            return isStopped;
+        }
     }
 }

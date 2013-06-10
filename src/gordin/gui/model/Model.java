@@ -40,6 +40,7 @@ public class Model {
 
     public Model(String initFile) throws IOException, InterruptedException
     {
+        boolean key = false;
         int numOfSuppliers = 0;
         int numOfWorkers = 0;
         int numOfDealers = 0;
@@ -95,7 +96,7 @@ public class Model {
                 }
                 case "LogSale" :
                 {
-                    boolean key = Boolean.parseBoolean(properties.getProperty(name));
+                    key = Boolean.parseBoolean(properties.getProperty(name));
                     break;
                 }
             }
@@ -109,7 +110,7 @@ public class Model {
         dealers = new ThreadPool(numOfDealers, maxNoOfDealerTasks);
         for(int i = 0; i < numOfDealers; i++)
         {
-            dealers.execute(new Dealer(carStorage));
+            dealers.execute(new Dealer(carStorage, key));
         }
 
         workers = new ThreadPool(numOfWorkers, maxNoOfWorkTasks);
@@ -122,7 +123,7 @@ public class Model {
         engineSup = new Thread(new EngineSupplier(engineStorage), "EngineSupplier");
     }
 
-    public void start() throws InterruptedException
+    public void start()
     {
         bodySup.start();
         engineSup.start();

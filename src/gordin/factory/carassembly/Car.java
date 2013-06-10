@@ -13,22 +13,23 @@ import gordin.factory.enginesupply.Engine;
  * To change this template use File | Settings | File Templates.
  */
 public class Car implements Enumerable{
-    static private Long lastId = new Long(1);
+    static private long lastId = 1;
+    static private final Object lock = new Object();
     private final long myId;
-    private Body body;
-    private Engine engine;
-    private Accessory accessory;
+    private final Body body;
+    private final Engine engine;
+    private final Accessory accessory;
 
     public Car(long idSupplier, Body body, Engine engine, Accessory accessory)
     {
-        synchronized (lastId)
+        synchronized (lock)
         {
             this.body = body;
             this.engine = engine;
             this.accessory = accessory;
-            String str = ""+idSupplier+lastId.intValue();
+            String str = ""+idSupplier+lastId;
             myId = Long.parseLong(str);
-            lastId = new Long(lastId.longValue()+1);
+            lastId++;
             System.out.println("c "+myId);
         }
     }

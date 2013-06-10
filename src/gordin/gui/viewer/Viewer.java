@@ -172,15 +172,9 @@ public class Viewer {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
-                    start.setEnabled(false);
-                    stop.setEnabled(true);
-                    model.start();
-                }
-                catch (InterruptedException ex)
-                {
-                    ex.printStackTrace();
-                }
+                start.setEnabled(false);
+                stop.setEnabled(true);
+                model.start();
             }
         });
         stop.addActionListener(new ActionListener() {

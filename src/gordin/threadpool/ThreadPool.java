@@ -13,8 +13,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ThreadPool {
-    private BlockingQueue<Runnable> tasks;
-    private List<PoolThread> threads = new LinkedList<PoolThread>();
+    private final BlockingQueue<Runnable> tasks;
+    private final List<PoolThread> threads = new LinkedList<PoolThread>();
     private boolean isStopped = false;
 
     public ThreadPool(int threadNum, int maxTasksNum)
