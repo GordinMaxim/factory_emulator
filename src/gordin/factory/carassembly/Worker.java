@@ -5,7 +5,6 @@ import gordin.factory.Enumerable;
 import gordin.factory.accessorysupply.Accessory;
 import gordin.factory.bodysupply.Body;
 import gordin.factory.enginesupply.Engine;
-import org.apache.log4j.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,24 +14,23 @@ import org.apache.log4j.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Worker implements Runnable, Enumerable {
-    static private volatile int workTime = 1*1000;
-    static private long lastId = 1;
-    static private final Object lock = new Object();
+    private static volatile int TIME = 1*1000;
+    private static long LAST_ID = 1;
+    private static final Object LOCK = new Object();
     private static int produced = 0;
-    private static final Object productLock = new Object();
-    private final long myId;
-    static private BlockingQueue<Body> bodyBlockingQueue;
-    static private BlockingQueue<Engine> engineBlockingQueue;
-    static private BlockingQueue<Accessory> accessoryBlockingQueue;
-    static private BlockingQueue<Car> carBlockingQueue;
+    private static final Object PRODUCT_LOCK = new Object();
+    private final long id;
+    private BlockingQueue<Body> bodyBlockingQueue;
+    private BlockingQueue<Engine> engineBlockingQueue;
+    private BlockingQueue<Accessory> accessoryBlockingQueue;
+    private BlockingQueue<Car> carBlockingQueue;
 
     private Worker(){
-        synchronized (lock){
-            myId = lastId;
-            lastId++;
-            System.out.println("w "+myId);
-
+        synchronized (LOCK){
+            id = LAST_ID;
+            LAST_ID++;
         }
+        System.out.println("w "+ id);
     }
 
     public Worker(BlockingQueue<Car> carBlockingQueue,
@@ -55,9 +53,9 @@ public class Worker implements Runnable, Enumerable {
                 Body body = bodyBlockingQueue.take();
                 Engine engine = engineBlockingQueue.take();
                 Accessory accessory = accessoryBlockingQueue.take();
-                Thread.sleep(workTime);
-                carBlockingQueue.put(new Car(myId, body, engine, accessory));
-                synchronized (productLock)
+                Thread.sleep(TIME);
+                carBlockingQueue.put(new Car(id, body, engine, accessory));
+                synchronized (PRODUCT_LOCK)
                 {
                     produced++;
                 }
@@ -65,27 +63,26 @@ public class Worker implements Runnable, Enumerable {
         }
         catch (InterruptedException e)
         {
+            System.out.println("worker correctly completed");
 //            e.printStackTrace();
         }
     }
 
     public long getId()
     {
-        return myId;
+        return id;
     }
 
     public static int producedCars()
     {
-        int n;
-        synchronized (productLock)
+        synchronized (PRODUCT_LOCK)
         {
-            n = produced;
+            return produced;
         }
-        return n;
     }
 
     public static void setWorkTime(int value)
     {
-        workTime = value;
+        TIME = value;
     }
 }

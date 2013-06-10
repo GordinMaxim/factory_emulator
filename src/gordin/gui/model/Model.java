@@ -25,9 +25,6 @@ import java.util.Properties;
  * To change this template use File | Settings | File Templates.
  */
 public class Model {
-    private final int maxNoOfWorkTasks = 20;
-    private final int maxNoOfDealerTasks = 20;
-    private final int maxNoOfSupplierTasks = 20;
     private BlockingQueue<Body> bodyStorage;
     private BlockingQueue<Engine> engineStorage;
     private BlockingQueue<Accessory> accessoryStorage;
@@ -35,13 +32,18 @@ public class Model {
     private ThreadPool accessorySups;
     private ThreadPool dealers;
     private ThreadPool workers;
-    private Thread bodySup;
-    private Thread engineSup;
+    private ThreadPool bodySups;
+    private ThreadPool engineSups;
 
     public Model(String initFile) throws IOException, InterruptedException
     {
+        final int maxNoOfWorkTasks = 20;
+        final int maxNoOfDealerTasks = 20;
+        final int maxNoOfSupplierTasks = 20;
         boolean key = false;
-        int numOfSuppliers = 0;
+        int numOfAccessorySuppliers = 0;
+        int numOfBodySuppliers = 0;
+        int numOfEngineSuppliers = 0;
         int numOfWorkers = 0;
         int numOfDealers = 0;
         InputStream stream = getClass().getResourceAsStream(initFile);
@@ -80,7 +82,17 @@ public class Model {
                 }
                 case "AccessorySuppliers" :
                 {
-                    numOfSuppliers = Integer.parseInt(properties.getProperty(name));
+                    numOfAccessorySuppliers = Integer.parseInt(properties.getProperty(name));
+                    break;
+                }
+                case "BodySuppliers" :
+                {
+                    numOfBodySuppliers = Integer.parseInt(properties.getProperty(name));
+                    break;
+                }
+                case "EngineSuppliers" :
+                {
+                    numOfEngineSuppliers = Integer.parseInt(properties.getProperty(name));
                     break;
                 }
                 case "Workers" :
@@ -101,10 +113,22 @@ public class Model {
                 }
             }
         }
-        accessorySups = new ThreadPool(numOfSuppliers, maxNoOfSupplierTasks);
-        for(int i = 0; i < numOfSuppliers; i++)
+        accessorySups = new ThreadPool(numOfAccessorySuppliers, maxNoOfSupplierTasks);
+        for(int i = 0; i < numOfAccessorySuppliers; i++)
         {
             accessorySups.execute(new AccessorySupplier(accessoryStorage));
+        }
+
+        bodySups = new ThreadPool(numOfBodySuppliers, maxNoOfSupplierTasks);
+        for(int i = 0; i < numOfBodySuppliers; i++)
+        {
+            bodySups.execute(new BodySupplier(bodyStorage));
+        }
+
+        engineSups = new ThreadPool(numOfEngineSuppliers, maxNoOfSupplierTasks);
+        for(int i = 0; i < numOfEngineSuppliers; i++)
+        {
+            engineSups.execute(new EngineSupplier(engineStorage));
         }
 
         dealers = new ThreadPool(numOfDealers, maxNoOfDealerTasks);
@@ -119,26 +143,26 @@ public class Model {
             workers.execute(new Worker(carStorage, bodyStorage, engineStorage, accessoryStorage));
         }
 
-        bodySup = new Thread(new BodySupplier(bodyStorage), "BodySupplier");
-        engineSup = new Thread(new EngineSupplier(engineStorage), "EngineSupplier");
+//        bodySup = new Thread(new BodySupplier(bodyStorage), "BodySupplier");
+//        engineSup = new Thread(new EngineSupplier(engineStorage), "EngineSupplier");
     }
 
     public void start()
     {
-        bodySup.start();
-        engineSup.start();
+        bodySups.start();
+        engineSups.start();
         accessorySups.start();
         workers.start();
         dealers.start();
     }
 
-    public void stop()
+    public void interrupt()
     {
-        bodySup.interrupt();
-        engineSup.interrupt();
-        accessorySups.stop();
-        workers.stop();
-        dealers.stop();
+        bodySups.interrupt();
+        engineSups.interrupt();
+        accessorySups.interrupt();
+        workers.interrupt();
+        dealers.interrupt();
     }
 
     public void setBodyProduceSpeed(int value)

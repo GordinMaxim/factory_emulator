@@ -47,7 +47,16 @@ public class ThreadPool {
         this.isStopped = true;
         for(PoolThread thread : threads)
         {
-            thread.stopThread();
+            thread.pauseThread();
         }
     }
+
+    public synchronized void interrupt()
+    {
+        for(PoolThread thread : threads)
+        {
+            thread.interrupt();
+        }
+    }
+
 }

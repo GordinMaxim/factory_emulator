@@ -11,20 +11,20 @@ import gordin.BlockingQueue;
  * To change this template use File | Settings | File Templates.
  */
 public class AccessorySupplier implements Runnable, Enumerable {
-    private static volatile int timeToCreate = 10*1000;
-    private static long lastId = 1;
-    private static final Object lock = new Object();
-    private static int produced = 0;
-    private static final Object productLock = new Object();
-    private final long myId;
+    private static volatile int TIME = 10*1000;
+    private static long LAST_ID = 1;
+    private static final Object LOCK = new Object();
+    private static int PRODUCED = 0;
+    private static final Object PRODUCT_LOCK = new Object();
+    private final long id;
     private BlockingQueue<Accessory> blockingQueue;
 
     private AccessorySupplier(){
-        synchronized (lock){
-            myId = lastId;
-            lastId++;
-            System.out.println("acsup "+myId);
+        synchronized (LOCK){
+            id = LAST_ID;
+            LAST_ID++;
         }
+        System.out.println("acsup "+ id);
     }
 
     public AccessorySupplier(BlockingQueue<Accessory> blockingQueue)
@@ -35,7 +35,7 @@ public class AccessorySupplier implements Runnable, Enumerable {
 
     public long getId()
     {
-        return myId;
+        return id;
     }
 
 
@@ -44,30 +44,29 @@ public class AccessorySupplier implements Runnable, Enumerable {
         try {
             while(true)
             {
-                Thread.sleep(timeToCreate);
+                Thread.sleep(TIME);
                 blockingQueue.put(new Accessory(getId()));
-                synchronized (productLock)
+                synchronized (PRODUCT_LOCK)
                 {
-                    produced++;
+                    PRODUCED++;
                 }
             }
         } catch (InterruptedException e) {
+            System.out.println("accessory supplier correctly completed");
 //            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
     public static int producedAccessories()
     {
-        int n;
-        synchronized (productLock)
+        synchronized (PRODUCT_LOCK)
         {
-            n = produced;
+            return PRODUCED;
         }
-        return n;
     }
 
     public static void setWorkTime(int value)
     {
-        timeToCreate = value;
+        TIME = value;
     }
 }

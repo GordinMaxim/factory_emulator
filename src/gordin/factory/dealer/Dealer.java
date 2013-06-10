@@ -16,20 +16,20 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class Dealer implements Runnable, Enumerable {
-    static final private Logger logger = Logger.getLogger(Dealer.class);
+    private static final Logger LOGGER = Logger.getLogger(Dealer.class);
     private boolean logging;
-    static private volatile int time = 1*1000;
-    static private long lastId = 1;
-    static private final Object lock = new Object();
-    private final long myId;
+    private static volatile int TIME = 1*1000;
+    private static long LAST_ID = 1;
+    private static final Object LOCK = new Object();
+    private final long id;
     private BlockingQueue<Car> carBlockingQueue;
 
     private Dealer(){
-        synchronized (lock){
-            myId = lastId;
-            lastId++;
-            System.out.println("d "+myId);
+        synchronized (LOCK){
+            id = LAST_ID;
+            LAST_ID++;
         }
+        System.out.println("d "+ id);
     }
 
     public Dealer(BlockingQueue<Car> carBlockingQueue, boolean logging){
@@ -43,29 +43,30 @@ public class Dealer implements Runnable, Enumerable {
         try{
             while(true)
             {
-                Thread.sleep(time);
+                Thread.sleep(TIME);
                 Car car = carBlockingQueue.take();
-                String info = "<"+new Date()+">: Dealer<"+myId+">: Auto<"
+                String info = "<"+new Date()+">: Dealer<"+ id +">: Auto<"
                                  +car.getId()+">(Body:<"+car.getBodyId()
                                  +">, Engine:<"+car.getEngineId()+">, Accessory:<"
                                  +car.getAccessoryId()+">)";
                 if(this.logging)
-                    logger.debug(info);
+                    LOGGER.debug(info);
             }
         }
         catch (InterruptedException e)
         {
+            System.out.println("dealer correctly completed");
 //            e.printStackTrace();
         }
     }
 
     public long getId()
     {
-        return myId;
+        return id;
     }
 
     public static void setWorkTime(int value)
     {
-        time = value;
+        TIME = value;
     }
 }

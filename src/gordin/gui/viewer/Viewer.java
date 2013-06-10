@@ -26,8 +26,7 @@ public class Viewer {
     private JFrame window;
     private JPanel slidersPanel;
     private JPanel infoPanel;
-    private final JButton start;
-    private final JButton stop;
+    private final JButton button;
     private JSlider bodySlider;
     private JSlider engineSlider;
     private JSlider accessorySlider;
@@ -118,13 +117,10 @@ public class Viewer {
         infoPanel.add(numberOfEngines);
         infoPanel.add(numberOfAccessories);
 
-        start = new JButton("start");
-        stop = new JButton("stop");
-        stop.setEnabled(false);
+        button = new JButton("start");
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
-        buttonPanel.add(start);
-        buttonPanel.add(stop);
+        buttonPanel.add(button);
 
         JPanel centralPanel = new JPanel();
         centralPanel.setLayout(new GridLayout(1, 2, 20, 20));
@@ -169,20 +165,25 @@ public class Viewer {
             }
         };
 
-        start.addActionListener(new ActionListener() {
+        button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                start.setEnabled(false);
-                stop.setEnabled(true);
-                model.start();
-            }
-        });
-        stop.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                    start.setEnabled(true);
-                    stop.setEnabled(false);
-                    model.stop();
+                String str = button.getText();
+                switch (str)
+                {
+                    case "start":
+                    {
+                        model.start();
+                        button.setText("finish");
+                        break;
+                    }
+                    case "finish":
+                    {
+                        model.interrupt();
+                        button.setEnabled(false);
+                        break;
+                    }
+                }
             }
         });
 

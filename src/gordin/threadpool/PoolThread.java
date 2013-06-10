@@ -9,7 +9,7 @@ import gordin.BlockingQueue;
  * Time: 1:12 AM
  * To change this template use File | Settings | File Templates.
  */
-public class PoolThread extends Thread {
+class PoolThread extends Thread {
     private final BlockingQueue<Runnable> tasks;
     private boolean isStopped = false;
     private final Object lock = new Object();
@@ -45,7 +45,7 @@ public class PoolThread extends Thread {
         }
     }
 
-    public void stopThread()
+    public void pauseThread()
     {
         synchronized (lock)
         {
@@ -53,11 +53,4 @@ public class PoolThread extends Thread {
         }
     }
 
-    public boolean isStopped()
-    {
-        synchronized (lock)
-        {
-            return isStopped;
-        }
-    }
 }
