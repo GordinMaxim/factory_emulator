@@ -12,7 +12,7 @@ import gordin.BlockingQueue;
 public class PoolThread extends Thread {
     private final BlockingQueue<Runnable> tasks;
     private boolean isStopped = false;
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     public PoolThread(BlockingQueue<Runnable> tasks)
     {
